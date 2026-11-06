@@ -101,6 +101,39 @@ def actualizar_producto(
     return producto
 
 
+# Vender una unidad de un producto
+@app.put(
+    "/productos/{producto_id}/vender",
+    response_model=ProductResponse
+)
+def vender_producto(
+    producto_id: int,
+    db: Session = Depends(get_db)
+):
+    producto = db.query(Product).filter(
+        Product.id == producto_id
+    ).first()
+
+    if producto is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Producto no encontrado"
+        )
+
+    if producto.stock <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail="No hay unidades disponibles"
+        )
+
+    producto.stock -= 1
+
+    db.commit()
+    db.refresh(producto)
+
+    return producto
+
+
 # Eliminar un producto
 @app.delete("/productos/{producto_id}")
 def eliminar_producto(
