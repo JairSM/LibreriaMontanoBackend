@@ -1,7 +1,38 @@
 
+import { useEffect, useState } from "react";
 import ProductList from "./components/ProductList";
 
 function App() {
+  const [seccion, setSeccion] = useState("inventario");
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then((respuesta) => {
+        if (!respuesta.ok) {
+          throw new Error("No se pudo cargar el inventario");
+        }
+        return respuesta.json();
+      })
+      .then((datos) => {
+        setProductos(datos);
+        setCargando(false);
+      })
+      .catch((error) => {
+        setError(error.message);
+        setCargando(false);
+      });
+  }, []);
+
+  const unidadesDisponibles = productos.reduce(
+    (total, producto) => total + producto.stock,
+    0
+  );
+
   return (
     <div className="min-h-screen bg-slate-100 flex">
       {/* Menú lateral */}
@@ -15,12 +46,27 @@ function App() {
         </p>
 
         <nav className="space-y-3">
-          <div className="bg-blue-600 rounded-lg px-4 py-3 font-semibold">
+          <button
+            onClick={() => setSeccion("inventario")}
+            className={`w-full text-left rounded-lg px-4 py-3 font-semibold ${
+              seccion === "inventario"
+                ? "bg-blue-600 text-white"
+                : "text-slate-300 hover:bg-slate-800"
+            }`}
+          >
             📦 Inventario
-          </div>
-          <div className="px-4 py-3 text-slate-300">
+          </button>
+
+          <button
+            onClick={() => setSeccion("productos")}
+            className={`w-full text-left rounded-lg px-4 py-3 font-semibold ${
+              seccion === "productos"
+                ? "bg-blue-600 text-white"
+                : "text-slate-300 hover:bg-slate-800"
+            }`}
+          >
             🏷️ Productos
-          </div>
+          </button>
         </nav>
 
         <div className="absolute bottom-6 text-slate-500 text-sm">
@@ -40,16 +86,61 @@ function App() {
         </header>
 
         <main className="max-w-7xl mx-auto p-6 md:p-8">
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-slate-800">
-              Inventario de productos
-            </h3>
-            <p className="text-slate-500 text-sm mt-1">
-              Consulta los productos registrados en la librería.
-            </p>
-          </div>
+          {seccion === "inventario" ? (
+            <>
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-slate-800">
+                  Inventario de productos
+                </h3>
+                <p className="text-slate-500 text-sm mt-1">
+                  Consulta el resumen actual de tu inventario.
+                </p>
+              </div>
 
-          <ProductList />
+              {cargando ? (
+                <p className="bg-white rounded-xl p-6">
+                  Cargando inventario...
+                </p>
+              ) : error ? (
+                <p className="bg-red-50 text-red-700 rounded-xl p-6">
+                  Error: {error}
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <p className="text-slate-500 text-sm">
+                      Productos registrados
+                    </p>
+                    <h3 className="text-3xl font-bold text-slate-800 mt-2">
+                      {productos.length}
+                    </h3>
+                  </div>
+
+                  <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <p className="text-slate-500 text-sm">
+                      Unidades disponibles
+                    </p>
+                    <h3 className="text-3xl font-bold text-blue-600 mt-2">
+                      {unidadesDisponibles}
+                    </h3>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-slate-800">
+                  Gestión de productos
+                </h3>
+                <p className="text-slate-500 text-sm mt-1">
+                  Registra, consulta, edita y elimina productos.
+                </p>
+              </div>
+
+              <ProductList />
+            </>
+          )}
         </main>
       </div>
     </div>
