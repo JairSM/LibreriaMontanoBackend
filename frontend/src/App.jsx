@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import ProductList from "./components/ProductList";
+import Vista3D from "./Vista3D";
 
 function App() {
   const [seccion, setSeccion] = useState("inventario");
@@ -33,10 +34,19 @@ function App() {
     0
   );
 
+  const claseBoton = (nombre) =>
+    `w-full text-left rounded-lg px-4 py-3 font-semibold transition-colors ${
+      seccion === nombre
+        ? "bg-blue-600 text-white"
+        : "text-slate-300 hover:bg-slate-800"
+    }`;
+
   return (
     <div className="min-h-screen bg-slate-100 flex">
-      {/* Menú lateral */}
-      <aside className="w-64 bg-slate-900 text-white min-h-screen p-6 hidden md:block">
+
+      {/* MENÚ LATERAL */}
+      <aside className="w-64 bg-slate-900 text-white min-h-screen p-6 hidden md:block relative">
+
         <h1 className="text-2xl font-bold mb-2">
           Librería Montaño
         </h1>
@@ -46,55 +56,72 @@ function App() {
         </p>
 
         <nav className="space-y-3">
+
           <button
             onClick={() => setSeccion("inventario")}
-            className={`w-full text-left rounded-lg px-4 py-3 font-semibold ${
-              seccion === "inventario"
-                ? "bg-blue-600 text-white"
-                : "text-slate-300 hover:bg-slate-800"
-            }`}
+            className={claseBoton("inventario")}
           >
             📦 Inventario
           </button>
 
           <button
             onClick={() => setSeccion("productos")}
-            className={`w-full text-left rounded-lg px-4 py-3 font-semibold ${
-              seccion === "productos"
-                ? "bg-blue-600 text-white"
-                : "text-slate-300 hover:bg-slate-800"
-            }`}
+            className={claseBoton("productos")}
           >
             🏷️ Productos
           </button>
+
+          <button
+            onClick={() => setSeccion("showroom")}
+            className={claseBoton("showroom")}
+          >
+            🏬 Showroom 3D
+          </button>
+
         </nav>
 
         <div className="absolute bottom-6 text-slate-500 text-sm">
           Librería Montaño © 2026
         </div>
+
       </aside>
 
-      {/* Contenido principal */}
+      {/* CONTENIDO PRINCIPAL */}
       <div className="flex-1 min-w-0">
+
         <header className="bg-white shadow-sm px-8 py-6">
+
           <h2 className="text-2xl font-bold text-slate-800">
-            Panel de control
+            {seccion === "inventario"
+              ? "Panel de control"
+              : seccion === "productos"
+                ? "Gestión de productos"
+                : "Showroom de Librería Montaño"}
           </h2>
+
           <p className="text-slate-500 mt-1">
-            Administración de productos e inventario
+            {seccion === "showroom"
+              ? "Explora nuestra tienda en tres dimensiones."
+              : "Administración de productos e inventario"}
           </p>
+
         </header>
 
         <main className="max-w-7xl mx-auto p-6 md:p-8">
-          {seccion === "inventario" ? (
+
+          {/* SECCIÓN INVENTARIO */}
+          {seccion === "inventario" && (
             <>
               <div className="mb-6">
+
                 <h3 className="text-xl font-bold text-slate-800">
                   Inventario de productos
                 </h3>
+
                 <p className="text-slate-500 text-sm mt-1">
                   Consulta el resumen actual de tu inventario.
                 </p>
+
               </div>
 
               {cargando ? (
@@ -107,42 +134,64 @@ function App() {
                 </p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
                   <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+
                     <p className="text-slate-500 text-sm">
                       Productos registrados
                     </p>
+
                     <h3 className="text-3xl font-bold text-slate-800 mt-2">
                       {productos.length}
                     </h3>
+
                   </div>
 
                   <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+
                     <p className="text-slate-500 text-sm">
                       Unidades disponibles
                     </p>
+
                     <h3 className="text-3xl font-bold text-blue-600 mt-2">
                       {unidadesDisponibles}
                     </h3>
+
                   </div>
+
                 </div>
               )}
             </>
-          ) : (
+          )}
+
+          {/* SECCIÓN PRODUCTOS */}
+          {seccion === "productos" && (
             <>
               <div className="mb-6">
+
                 <h3 className="text-xl font-bold text-slate-800">
                   Gestión de productos
                 </h3>
+
                 <p className="text-slate-500 text-sm mt-1">
                   Registra, consulta, edita y elimina productos.
                 </p>
+
               </div>
 
               <ProductList />
             </>
           )}
+
+          {/* SECCIÓN SHOWROOM 3D */}
+          {seccion === "showroom" && (
+            <Vista3D />
+          )}
+
         </main>
+
       </div>
+
     </div>
   );
 }
